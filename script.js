@@ -1,3 +1,5 @@
+
+
 $(document).ready(function() {
   const usRegex = /^\d{5}(?:-\d{4})?$/;  
   const canadaRegex = /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
@@ -10,44 +12,50 @@ $(document).ready(function() {
   countrySelect.append(placeholderOption);
   
   countries.forEach(country => {
-    // const option = $("<option>").val(country.toLowerCase().replace(" ", "-")).text(country);
     const option = $("<option>").val(country.replace(" ", "-")).text(country);
     countrySelect.append(option);
   });
 
+  var xy = true;
+  
   $("#postal-form").submit(function(event) {
     event.preventDefault();
 
-    var postalCode = $("#postal-code").val();
-    var selectedCountry = $("#country-select").val();
+    if (xy) {
+      var postalCode = $("#postal-code").val();
+      var selectedCountry = $("#country-select").val();
 
-    console.log("Selected Country:", selectedCountry);
+      console.log("Selected Country:", selectedCountry);
 
-    if (usRegex.test(postalCode) || canadaRegex.test(postalCode)) {
-      $("#country-dropdown").hide();
-      alert("Valid postal code.");
-      this.submit(); 
-    } else {
-      alert("select your country");
-      $("#country-dropdown").show();
+      if (usRegex.test(postalCode) || canadaRegex.test(postalCode)) {
+        $("#country-dropdown").hide();
+        alert("Valid postal code.");
+        this.submit(); 
+      } else {
+        xy = false;
+        // alert("Invalid postal code. Please select your country");
+        $("#country-dropdown").show();
+      }
     }
   });
 
-  $("#country-select").change(function() {
-    var postalCode = $("#postal-code").val();
-    var selectedCountry = $(this).val();
-
-    if (selectedCountry) {
-      // If a country is selected, hide the dropdown
-      $("#country-dropdown").hide();
+  // Handle the form submission when xy is false
+  $("#postal-form").submit(function(event) {
+    if (!xy) {
+      validatePostalCode();
+      event.preventDefault(); // Prevent the default form submission
     }
+  });
 
+  function validatePostalCode() {
+    var postalCode = $("#postal-code").val();
+    var selectedCountry = $("#country-select").val();
+  
     if (selectedCountry === "") {
-      alert("Select a country.");
-      return; 
+      alert("Invalid postal code. Please select your country");
+      return; // Prevent further execution
     }
   
-
     $.ajax({
       url: "/validate-postal.php",
       type: "GET",
@@ -57,18 +65,12 @@ $(document).ready(function() {
       },
       async: true,
       success: function(response) {
-
         console.log("Response from validate-postal.php:", response);
-
-        // console.log(response.status);
-
+  
         if (response === "valid") {
-
           console.log("Form should be submitted now.");
-          
-          $("#country-dropdown").hide(); 
           alert("Valid postal code for the selected country.");
-          $("#postal-form").get(0).submit(); 
+          $("#postal-form").get(0).submit();
         } else {
           alert("Postal code is not valid for the selected country.");
         }
@@ -77,12 +79,8 @@ $(document).ready(function() {
         alert("An error occurred while validating the postal code.");
       }
     });
-  });
+  }
 });
-
-
-
-
 
 
 
