@@ -12,7 +12,7 @@ if ($jsonData === false) {
     exit;
 }
 
-$postalCodeData = json_decode($jsonData, true); // Parse JSON as an associative array
+$postalCodeData = json_decode($jsonData, true); // Parse JSON as associative array
 $countryRegexMap = [];
 
 foreach ($postalCodeData as $entry) {
